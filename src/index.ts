@@ -1,6 +1,7 @@
 import Interval, { io, ctx } from '@interval/sdk';
 import 'dotenv/config'; // loads environment variables from .env
 import { getCharges, refundCharge } from './payments';
+import { getCoupons, createCoupon, createPromo } from './coupons';
 
 const interval = new Interval({
   apiKey: process.env.INTERVAL_KEY,
@@ -32,6 +33,52 @@ const interval = new Interval({
 
       // Values returned from actions are automatically stored with Interval transaction logs
       return { chargesRefunded: chargesToRefund.length };
+    },
+    add_coupon: async () => {
+      const [name, amount] = await io.group([
+        io.input.text('Name'),
+        io.input.number('Amount', {
+          decimals: 2
+        })
+      ]);
+
+      ctx.log(typeof amount);
+      ctx.log({ amount: amount * 100 });
+
+      const coupon = await createCoupon(name, amount * 100);
+
+      await io.display.table('Coupons', {
+        data: [coupon]
+      });
+
+      return { couponCreated: 1 };
+    },
+    add_promo: async () => {
+      const coupons = await getCoupons();
+
+      const promoCoupon = await io.select.single('Coupons', {
+        options: coupons.data.map(coupon => {
+          return {
+            label: coupon.name,
+            value: coupon.id
+          }
+        }),
+        helpText: 'Select one coupon to use for promo code'
+      });
+
+      const promo = await createPromo(promoCoupon.value);
+
+      await io.group([
+        io.display.table('Promo', {
+          data: [promo]
+        }),
+
+        io.display.code('Code', {
+          code: promo.code
+        }),
+      ]);
+
+      return { promoCreated: 1 };
     },
   },
 });

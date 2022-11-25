@@ -1,17 +1,18 @@
-/* 
-  Have a real Stripe account you'd like to use? 
+/*
+  Have a real Stripe account you'd like to use?
   You can replace this import with: import Stripe from "stripe";
 */
-import Stripe from '@interval/fake-stripe';
+import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_KEY, {
-  apiVersion: '2020-08-27',
+  apiVersion: '2022-11-15',
 });
 
-/*
-  This function picks the first Stripe "Customer" with a given email, but Stripe Customers aren't really unique on email. 
 
-  In a later part of the tutorial, we'll modify this function to return all matching customers and use the `io.search` method to allow the person running our action to choose which of the matching Customers they want to refund. 
+/*
+  This function picks the first Stripe "Customer" with a given email, but Stripe Customers aren't really unique on email.
+
+  In a later part of the tutorial, we'll modify this function to return all matching customers and use the `io.search` method to allow the person running our action to choose which of the matching Customers they want to refund.
 */
 export async function getCharges(customerEmail: string) {
   const customers = await stripe.customers.list({
