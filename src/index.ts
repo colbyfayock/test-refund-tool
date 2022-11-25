@@ -35,20 +35,27 @@ const interval = new Interval({
       return { chargesRefunded: chargesToRefund.length };
     },
     add_coupon: async () => {
-      const [name, amount] = await io.group([
-        io.input.text('Name'),
+      const [ name, amount ] = await io.group([
+        io.input.text('Name or Description'),
         io.input.number('Amount', {
           decimals: 2
         })
-      ]);
-
-      ctx.log(typeof amount);
-      ctx.log({ amount: amount * 100 });
+      ], {
+        continueButton: {
+          label: 'Create Coupon'
+        }
+      });
 
       const coupon = await createCoupon(name, amount * 100);
 
-      await io.display.table('Coupons', {
-        data: [coupon]
+      await io.group([
+        io.display.table('Coupons', {
+          data: [coupon]
+        })
+      ], {
+        continueButton: {
+          label: 'Finish'
+        }
       });
 
       return { couponCreated: 1 };
@@ -56,15 +63,21 @@ const interval = new Interval({
     add_promo: async () => {
       const coupons = await getCoupons();
 
-      const promoCoupon = await io.select.single('Coupons', {
-        options: coupons.data.map(coupon => {
-          return {
-            label: coupon.name,
-            value: coupon.id
-          }
-        }),
-        helpText: 'Select one coupon to use for promo code'
-      });
+      const [promoCoupon] = await io.group([
+        io.select.single('Coupons', {
+          options: coupons.data.map(coupon => {
+            return {
+              label: coupon.name,
+              value: coupon.id
+            }
+          }),
+          helpText: 'Select one coupon to use for promo code'
+        })
+      ], {
+        continueButton: {
+          label: 'Create Promo Code'
+        }
+      })
 
       const promo = await createPromo(promoCoupon.value);
 
@@ -76,7 +89,11 @@ const interval = new Interval({
         io.display.code('Code', {
           code: promo.code
         }),
-      ]);
+      ], {
+        continueButton: {
+          label: 'Finish'
+        }
+      });
 
       return { promoCreated: 1 };
     },
