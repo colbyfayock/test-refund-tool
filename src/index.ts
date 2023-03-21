@@ -106,6 +106,69 @@ const interval = new Interval({
       },
       name: 'Promo - Create'
     },
+    import_products: {
+      handler: async () => {
+
+        const productsToImport = await io.experimental.spreadsheet(
+          'Enter products to import',
+          {
+            columns: {
+              id: 'number',
+              pid: 'string',
+              sku: 'string',
+              name: 'string',
+              units: 'number',
+              imageUrl: 'string?'
+            },
+          }
+        );
+
+        ctx.log(productsToImport)
+
+        await io.display.table('Promo', {
+          data: [productsToImport]
+        });
+
+
+
+        // const coupons = await getCoupons();
+
+        // const [promoCoupon] = await io.group([
+        //   io.select.single('Coupons', {
+        //     options: coupons.data.map(coupon => {
+        //       return {
+        //         label: coupon.name,
+        //         value: coupon.id
+        //       }
+        //     }),
+        //     helpText: 'Select one coupon to use for promo code'
+        //   })
+        // ], {
+        //   continueButton: {
+        //     label: 'Create Promo Code'
+        //   }
+        // })
+
+        // const promo = await createPromo(promoCoupon.value);
+
+        // await io.group([
+        //   io.display.table('Promo', {
+        //     data: [promo]
+        //   }),
+
+        //   io.display.code('Code', {
+        //     code: promo.code
+        //   }),
+        // ], {
+        //   continueButton: {
+        //     label: 'Finish'
+        //   }
+        // });
+
+        return { productsImported: 1 };
+      },
+      name: 'Products - Import'
+    },
   },
 });
 
